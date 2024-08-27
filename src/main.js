@@ -87,9 +87,11 @@ const onSearchFormSubmit = async event => {
 const onLoadMoreBtnClick = async event => {
     try {
         currentPage++;
+        showLoadingIndicator();
 
         const response = await fetchPhotos(searchedValue, currentPage);
-
+        const totalHits = response.data.total;
+        const currentHits = galleryEl.querySelectorAll('a').length;
         const galleryCardsTemplate = response.data.hits
             .map(imgDetails => createGalleryCardTemplate(imgDetails))
             .join('');
@@ -98,27 +100,23 @@ const onLoadMoreBtnClick = async event => {
 
         lightbox.refresh();
 
-
-        window.scrollBy({
-            top: cardHeight * 2,
-            behavior: 'smooth',
-        });
-
-        const totalPages = Math.ceil(response.data.totalHits / response.data.hits.length);
-        if (currentPage >= totalPages) {
+        if (currentHits + response.data.hits.length >= totalHits) {
             loadMoreBtnEl.classList.add('is-hidden');
             iziToast.error({
                 message: 'We are sorry, but you have reached the end of search results.',
                 position: 'topRight',
             });
-        }
+        } 
+        window.scrollBy({
+            top: cardHeight * 2,
+            behavior: 'smooth',
+        });
     } catch (err) {
         console.log(err);
+    }finally {
+        hideLoadingIndicator();
     }
-
 };
-
-
 
 searchFormEl.addEventListener('submit', onSearchFormSubmit);
 loadMoreBtnEl.addEventListener('click', onLoadMoreBtnClick);
