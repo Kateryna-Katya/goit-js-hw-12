@@ -21,7 +21,13 @@ let currentPage = 1;
 let searchedValue = '';
 let cardHeight = 0;
 
-
+const lightbox = new SimpleLightbox('.js-gallery a', {
+    captions: true,
+    captionsData: 'alt',
+    captionPosition: 'bottom',
+    captionDelay: 250,
+    overlayOpacity: 0.7,
+});
 
 function showLoadingIndicator() {
     loadingIndicatorEl.classList.remove('hidden');
@@ -36,6 +42,13 @@ const onSearchFormSubmit = async event => {
         event.preventDefault();
 
         searchedValue = searchFormEl.elements.user_query.value.trim();
+        if (!searchedValue) {
+            iziToast.warning({
+                message: 'Please enter a search query.',
+                position: 'topRight',
+            });
+            return;
+        }
         showLoadingIndicator();
         currentPage = 1;
         const response = await fetchPhotos(searchedValue, currentPage);
@@ -61,16 +74,6 @@ const onSearchFormSubmit = async event => {
         cardHeight = galleryCardEl.getBoundingClientRect().height;
 
         loadMoreBtnEl.classList.remove('is-hidden');
-
-
-        const lightbox = new SimpleLightbox('.js-gallery a', {
-            captions: true,
-            captionsData: 'alt',
-            captionPosition: 'bottom',
-            captionDelay: 250,
-            overlayOpacity: 0.7,
-        });
-
         lightbox.refresh();
 
     } catch (err) {
@@ -92,14 +95,6 @@ const onLoadMoreBtnClick = async event => {
             .join('');
 
         galleryEl.insertAdjacentHTML('beforeend', galleryCardsTemplate);
-
-        const lightbox = new SimpleLightbox('.js-gallery a', {
-            captions: true,
-            captionsData: 'alt',
-            captionPosition: 'bottom',
-            captionDelay: 250,
-            overlayOpacity: 0.7,
-        });
 
         lightbox.refresh();
 
